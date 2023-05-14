@@ -17,11 +17,11 @@ describe('[Challenge] Naive receiver', function () {
 
         const LenderPoolFactory = await ethers.getContractFactory('NaiveReceiverLenderPool', deployer);
         const FlashLoanReceiverFactory = await ethers.getContractFactory('FlashLoanReceiver', deployer);
-        
+
         pool = await LenderPoolFactory.deploy();
         await deployer.sendTransaction({ to: pool.address, value: ETHER_IN_POOL });
         const ETH = await pool.ETH();
-        
+
         expect(await ethers.provider.getBalance(pool.address)).to.be.equal(ETHER_IN_POOL);
         expect(await pool.maxFlashLoan(ETH)).to.eq(ETHER_IN_POOL);
         expect(await pool.flashFee(ETH, 0)).to.eq(10n ** 18n);
@@ -37,7 +37,9 @@ describe('[Challenge] Naive receiver', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        const NaiveAttackerFactory = await ethers.getContractFactory('NaiveAttacker', deployer);
+        let naiveAttacker = await NaiveAttackerFactory.deploy();
+        naiveAttacker.connect(player).executeAttack(pool.address, receiver.address);
     });
 
     after(async function () {
