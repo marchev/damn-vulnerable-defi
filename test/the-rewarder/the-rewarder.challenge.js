@@ -36,7 +36,7 @@ describe('[Challenge] The rewarder', function () {
         expect(await accountingToken.hasAllRoles(rewarderPool.address, minterRole | snapshotRole | burnerRole)).to.be.true;
 
         // Alice, Bob, Charlie and David deposit tokens
-        let depositAmount = 100n * 10n ** 18n; 
+        let depositAmount = 100n * 10n ** 18n;
         for (let i = 0; i < users.length; i++) {
             await liquidityToken.transfer(users[i].address, depositAmount);
             await liquidityToken.connect(users[i]).approve(rewarderPool.address, depositAmount);
@@ -50,7 +50,7 @@ describe('[Challenge] The rewarder', function () {
 
         // Advance time 5 days so that depositors can get rewards
         await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
-        
+
         // Each depositor gets reward tokens
         let rewardsInRound = await rewarderPool.REWARDS();
         for (let i = 0; i < users.length; i++) {
@@ -63,13 +63,21 @@ describe('[Challenge] The rewarder', function () {
 
         // Player starts with zero DVT tokens in balance
         expect(await liquidityToken.balanceOf(player.address)).to.eq(0);
-        
+
         // Two rounds must have occurred so far
         expect(await rewarderPool.roundNumber()).to.be.eq(2);
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // Wait for 5 days so the next reward round starts
+        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
+
+        const TheRewardAttackerFactory = await ethers.getContractFactory('TheRewardAttacker', player);
+        let attacker = await TheRewardAttackerFactory
+            .deploy(flashLoanPool.address, rewarderPool.address,
+                liquidityToken.address, rewardToken.address,
+                player.address);
+        await attacker.attack();
     });
 
     after(async function () {
@@ -86,7 +94,7 @@ describe('[Challenge] The rewarder', function () {
             const delta = userRewards.sub((await rewarderPool.REWARDS()).div(users.length));
             expect(delta).to.be.lt(10n ** 16n)
         }
-        
+
         // Rewards must have been issued to the player account
         expect(await rewardToken.totalSupply()).to.be.gt(await rewarderPool.REWARDS());
         const playerRewards = await rewardToken.balanceOf(player.address);
